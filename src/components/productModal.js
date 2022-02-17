@@ -8,27 +8,33 @@ export default {
             productModal: "",
             product: {},
             productNum: 1,
+            productId: ""
         }
     },
     watch: {
         id() {
             // 當 props 傳進來的 id 有變動時就會觸發
             // 執行 取得單一產品資訊
-            this.getProduct();
+            // this.getProduct();
+
+            // this.productId = this.id;
         }
     },
     methods: {
-        openProductModal() {
+        openProductModal(id) {
             // 開啟 modal 先將數量改成 1
             this.productNum = 1;
             this.productModal.show();
+
+            // 執行 取得 單一產品資訊
+            this.getProduct(id);
         },
         closeProductModal() {
             this.productModal.hide();
         },
         // 取得 單一產品資訊
-        getProduct() {
-            const url = `${baseUrl}/api/${apiPath}/product/${this.id}`;
+        getProduct(id) {
+            const url = `${baseUrl}/api/${apiPath}/product/${id}`;
             axios.get(url)
                 .then((res) => {
                     // console.log(res);

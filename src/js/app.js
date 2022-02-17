@@ -57,8 +57,9 @@ const app = Vue.createApp({
             // 執行 開啟 loading 效果
             this.openLoading();
 
+            
             // 開啟 product-modal 元件
-            this.$refs.productModal.openProductModal();
+            this.$refs.productModal.openProductModal(id);
 
             // 執行 取得單一產品資訊 (product-modal 元件內的方法)
             // this.$refs.productModal.getProduct(id);

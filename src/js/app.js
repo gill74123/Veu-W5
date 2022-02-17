@@ -1,5 +1,4 @@
-const baseUrl = "https://vue3-course-api.hexschool.io/v2";
-const apiPath = "gillchin";
+import productModal from "../components/productModal.js";
 
 // vee-validate 規則載入
 Object.keys(VeeValidateRules).forEach(rule => {
@@ -9,12 +8,14 @@ Object.keys(VeeValidateRules).forEach(rule => {
 });
 // 讀取外部資源
 VeeValidateI18n.loadLocaleFromURL('./zh_TW.json');
-// Activate the locale
-// 設定的方式
+// Activate the locale 設定的方式
 VeeValidate.configure({
   generateMessage: VeeValidateI18n.localize('zh_TW'),
-  validateOnInput: true, // 調整為輸入字元立即進行驗證
+  validateOnInput: false, // 調整為輸入字元立即進行驗證
 });
+
+const baseUrl = "https://vue3-course-api.hexschool.io/v2";
+const apiPath = "gillchin";
 
 const app = Vue.createApp({
     data() {
@@ -27,17 +28,22 @@ const app = Vue.createApp({
             isLoading: "",
             formData:{
                 user:{}
-            }
+            },
+            isLoadingComponent: false
         }
     },
     methods: {
         // 取得 產品列表
         getProducts() {
             const url = `${baseUrl}/api/${apiPath}/products/all`;
+            this.openLoading();
             axios.get(url)
                 .then((res) => {
                     // console.log(res);
                     this.products = res.data.products;
+
+                    // 執行 關閉 loading 效果
+                    this.closeLoading();
                 })
                 .catch((err) => {
                     console.log(err);
@@ -47,6 +53,9 @@ const app = Vue.createApp({
         openProductModal(id) {
             // 將單一產品 id 帶入
             this.productId = id;
+
+            // 執行 開啟 loading 效果
+            this.openLoading();
 
             // 開啟 product-modal 元件
             this.$refs.productModal.openProductModal();
@@ -103,7 +112,7 @@ const app = Vue.createApp({
             this.isLoading = item.id,
             axios.put(url, {data})
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     // 執行 取得購物車列表
                     this.getCart();
 
@@ -117,10 +126,14 @@ const app = Vue.createApp({
         // 刪除 全部購物車產品
         removeCart() {
             const url = `${baseUrl}/api/${apiPath}/carts`;
+            // 點擊加入購物車會把 isLoading 賦予 true
+            this.isLoading = true;
             axios.delete(url)
                 .then((res) => {
                     // console.log(res);
-                    alert('已清空購物車!');
+                    // 點擊加入購物車會把 isLoading 賦予空值
+                    this.isLoading = "";
+
                     // 執行 取得購物車列表
                     this.getCart();
                 })
@@ -136,7 +149,7 @@ const app = Vue.createApp({
             this.isLoading = id;
             axios.delete(url)
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     // // 執行 取得購物車列表
                     this.getCart();
 
@@ -149,11 +162,10 @@ const app = Vue.createApp({
         },
         // 新增訂單
         addOrder() {
-            console.log(this.$refs);
             const url = `${baseUrl}/api/${apiPath}/order`;
             axios.post(url, {data: this.formData})
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     alert('訂單已成立！');
                     // 執行 取得購物列表
                     this.getCart();
@@ -164,6 +176,14 @@ const app = Vue.createApp({
                 .catch((err) => {
                     console.log(err);
                 })
+        },
+        // 開啟 loading 效果
+        openLoading() {
+            this.isLoadingComponent = true;
+        },
+        // 關閉 loading 效果
+        closeLoading() {
+            this.isLoadingComponent = false;
         }
     },
     mounted() {
@@ -176,56 +196,10 @@ const app = Vue.createApp({
 })
 
 // product-modal 元件
-app.component('product-modal',{
-    props: ['id', 'is-loading'],
-    data() {
-        return {
-            productModal: "",
-            product: {},
-            productNum: 1,
-        }
-    },
-    watch: {
-        id() {
-            // 當 props 傳進來的 id 有變動時就會觸發
-            // 執行 取得單一產品資訊
-            this.getProduct();
-        }
-    },
-    methods: {
-        openProductModal() {
-            // 開啟 modal 先將數量改成 1
-            this.productNum = 1;
-            this.productModal.show();
-        },
-        closeProductModal() {
-            this.productModal.hide();
-        },
-        // 取得 單一產品資訊
-        getProduct() {
-            const url = `${baseUrl}/api/${apiPath}/product/${this.id}`;
-            axios.get(url)
-                .then((res) => {
-                    // console.log(res);
-                    this.product = res.data.product;
-                })
-                .catch((err) => {
-                    console.log(err);
-                })
-        },
-        // 加入購物車 (根元件已經有加入購物車的方法，所以這邊使用 emit 呼叫外層事件)
-        addCart() {
-            this.$emit('add-cart', this.product.id, this.productNum);
-        }
-    },
-    mounted() {
-        this.productModal = new bootstrap.Modal(this.$refs.modal, {keyboard: false});
-    },
-    template: "#productModal"
-})
+app.component('product-modal', productModal);
 
 // vue-loading 元件
-app.component('loading', VueLoading.Component)
+app.component('loading', VueLoading.Component);
 
 // vee-validate 表單驗證元件
 app.component('VForm', VeeValidate.Form);

@@ -21,8 +21,11 @@
     <div id="app">
         <div class="container">
             <div class="mt-4">
+                <!-- loading 元件 -->
+                <loading :active="isLoadingComponent"></loading>
+
                 <!-- 產品Modal -->
-                <product-modal ref="productModal" :id="productId" :is-loading="isLoading" @add-cart="addCart"></product-modal>
+                <product-modal ref="productModal" :id="productId" :is-loading="isLoading" @add-cart="addCart" @close-loading="closeLoading"></product-modal>
                 <!-- 產品Modal -->
 
                 <!-- 產品列表 -->
@@ -70,7 +73,11 @@
                 </table>
                 <!-- 購物車列表 -->
                 <div class="text-end">
-                    <button class="btn btn-outline-danger" type="button" @click="removeCart" :disabled="cartData.carts.length === 0">清空購物車</button>
+                    <button class="btn btn-outline-danger" type="button" @click="removeCart" 
+                    :disabled="cartData.carts.length === 0 || isLoading === true">
+                    <i class="fas fa-spinner fa-pulse" v-show="isLoading === true"></i>
+                    清空購物車
+                    </button>
                 </div>
                 <table class="table align-middle">
                     <thead>
